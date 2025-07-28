@@ -47,16 +47,18 @@ export const ApiSidebar = ({ endpoints, selectedEndpoint, onSelectEndpoint }: Ap
                   : "hover:bg-muted"
               )}
             >
-              <div className="flex items-center justify-between mb-1">
-                <span className="font-medium text-sm">{endpoint.name}</span>
+              <div className="flex items-center justify-between mb-2">
+                <span className="font-medium text-sm truncate pr-2">{endpoint.name}</span>
                 <Badge 
                   variant="secondary" 
-                  className={cn("text-xs font-medium", methodColors[endpoint.method])}
+                  className={cn("text-xs font-medium flex-shrink-0", methodColors[endpoint.method])}
                 >
                   {endpoint.method}
                 </Badge>
               </div>
-              <p className="text-xs text-muted-foreground">{endpoint.description}</p>
+              <code className="text-xs text-muted-foreground bg-muted/50 px-2 py-1 rounded block truncate">
+                {endpoint.path}
+              </code>
             </button>
           ))}
         </div>

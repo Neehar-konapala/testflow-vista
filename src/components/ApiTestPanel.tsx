@@ -6,7 +6,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Play, Copy } from "lucide-react";
+import { Play, Copy, Info } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
 interface Parameter {
@@ -100,8 +100,79 @@ export const ApiTestPanel = ({ endpoint }: ApiTestPanelProps) => {
               </Button>
             </div>
             <h1 className="text-3xl font-bold mb-2">{endpoint.name}</h1>
-            <p className="text-muted-foreground">{endpoint.description}</p>
           </div>
+
+          {/* Description Box */}
+          <Card className="mb-6">
+            <CardHeader>
+              <CardTitle className="text-lg flex items-center gap-2">
+                <Info className="w-5 h-5" />
+                Description
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="prose prose-sm max-w-none">
+                <p className="text-muted-foreground leading-relaxed">
+                  {endpoint.description}
+                </p>
+                
+                {/* Additional details based on endpoint type */}
+                {endpoint.id === "classify" && (
+                  <div className="mt-4 space-y-2">
+                    <h4 className="font-semibold text-foreground">Key Features:</h4>
+                    <ul className="list-disc list-inside space-y-1 text-sm text-muted-foreground">
+                      <li>Accepts PDF documents with multiple document types</li>
+                      <li>Utilizes Azure Custom Classification model</li>
+                      <li>Automatically identifies and categorizes distinct document types</li>
+                      <li>Processes multiple pages within a single file</li>
+                      <li>Supports PNG, JPG, JPEG, and PDF file formats</li>
+                    </ul>
+                  </div>
+                )}
+                
+                {endpoint.id === "extract-async" && (
+                  <div className="mt-4 space-y-2">
+                    <h4 className="font-semibold text-foreground">Key Features:</h4>
+                    <ul className="list-disc list-inside space-y-1 text-sm text-muted-foreground">
+                      <li>Runs DocX Agent asynchronously for non-blocking processing</li>
+                      <li>Extracts structured data including tables, fields, and entities</li>
+                      <li>Handles multiple document files simultaneously</li>
+                      <li>Supports custom extraction queries</li>
+                      <li>Ideal for large document processing workflows</li>
+                      <li>Returns immediately with a trace ID for status tracking</li>
+                    </ul>
+                  </div>
+                )}
+                
+                {endpoint.id === "extract" && (
+                  <div className="mt-4 space-y-2">
+                    <h4 className="font-semibold text-foreground">Key Features:</h4>
+                    <ul className="list-disc list-inside space-y-1 text-sm text-muted-foreground">
+                      <li>Synchronous processing with immediate results</li>
+                      <li>Extracts structured data and text content</li>
+                      <li>User-defined extraction queries for precise data retrieval</li>
+                      <li>Returns cleaned, structured data directly</li>
+                      <li>Best for real-time document processing needs</li>
+                      <li>Supports multiple file uploads in a single request</li>
+                    </ul>
+                  </div>
+                )}
+                
+                {endpoint.id === "trace" && (
+                  <div className="mt-4 space-y-2">
+                    <h4 className="font-semibold text-foreground">Key Features:</h4>
+                    <ul className="list-disc list-inside space-y-1 text-sm text-muted-foreground">
+                      <li>Retrieves detailed processing status by trace ID</li>
+                      <li>Provides associated metadata for document tasks</li>
+                      <li>Monitors task progress and outcomes</li>
+                      <li>Essential for tracking asynchronous operations</li>
+                      <li>Returns comprehensive status information</li>
+                    </ul>
+                  </div>
+                )}
+              </div>
+            </CardContent>
+          </Card>
 
           {/* Authorization */}
           <Card className="mb-6">
@@ -150,6 +221,9 @@ export const ApiTestPanel = ({ endpoint }: ApiTestPanelProps) => {
                         placeholder={param.description}
                         className="mt-1"
                       />
+                      <p className="text-xs text-muted-foreground mt-1">
+                        {param.description}
+                      </p>
                     </div>
                   ))}
                 </div>
@@ -161,20 +235,29 @@ export const ApiTestPanel = ({ endpoint }: ApiTestPanelProps) => {
           {endpoint.method !== "GET" && (
             <Card className="mb-6">
               <CardHeader>
-                <CardTitle className="text-lg">Body</CardTitle>
-                <div className="text-sm text-muted-foreground">application/json</div>
+                <CardTitle className="text-lg">Request Body</CardTitle>
+                <div className="text-sm text-muted-foreground">
+                  {endpoint.method === "POST" && endpoint.id !== "trace" ? "multipart/form-data" : "application/json"}
+                </div>
               </CardHeader>
               <CardContent>
                 <Textarea
                   value={requestBody}
                   onChange={(e) => setRequestBody(e.target.value)}
-                  placeholder="Enter JSON request body..."
+                  placeholder="Enter request body..."
                   className="min-h-32 font-mono text-sm"
                 />
+                {endpoint.bodySchema && (
+                  <div className="mt-2">
+                    <p className="text-xs text-muted-foreground mb-2">Expected format:</p>
+                    <pre className="text-xs bg-muted p-2 rounded overflow-x-auto">
+                      {endpoint.bodySchema}
+                    </pre>
+                  </div>
+                )}
               </CardContent>
             </Card>
           )}
-
 
           {/* Response */}
           {response && (
@@ -185,8 +268,8 @@ export const ApiTestPanel = ({ endpoint }: ApiTestPanelProps) => {
               <CardContent>
                 <div className="flex justify-between items-center mb-3">
                   <div className="flex gap-2">
-                    <Badge className="bg-green-100 text-green-800">200</Badge>
-                    <Badge className="bg-green-100 text-green-800">422</Badge>
+                    <Badge className="bg-green-100 text-green-800">200 OK</Badge>
+                    <Badge variant="outline">application/json</Badge>
                   </div>
                 </div>
                 <pre className="bg-muted p-4 rounded-lg text-sm overflow-x-auto">
@@ -225,9 +308,10 @@ export const ApiTestPanel = ({ endpoint }: ApiTestPanelProps) => {
             <TabsContent value="curl" className="mt-4">
               <pre className="text-xs bg-card p-3 rounded-lg overflow-x-auto">
                 <code>{`curl -X ${endpoint.method} \\
-  "${endpoint.path}" \\
+  "https://kong-uat-proxy.hachiai.com/quest${endpoint.path}" \\
   -H "Authorization: Bearer <token>" \\
-  -H "Content-Type: application/json"`}</code>
+  ${endpoint.method !== "GET" ? '-H "Content-Type: application/json" \\' : ''}
+  ${endpoint.method !== "GET" ? '-d \'<request_body>\'' : ''}`}</code>
               </pre>
             </TabsContent>
           </Tabs>
