@@ -3,155 +3,115 @@ import { ApiSidebar } from "@/components/ApiSidebar";
 import { ApiTestPanel } from "@/components/ApiTestPanel";
 import { ApiHeader } from "@/components/ApiHeader";
 
-// Mock data for demonstration
+// HachiAI API endpoints from OpenAPI specification
 const mockEndpoints = [
   {
-    id: "split",
-    name: "Split",
+    id: "classify",
+    name: "Analyze and Classify Invoice Pages",
     method: "POST" as const,
-    path: "/split",
-    description: "Split documents into smaller chunks",
-    parameters: [
-      {
-        name: "document_url",
-        type: "string",
-        required: true,
-        description: "The URL of the document to be processed"
-      }
-    ],
+    path: "/v1/classify",
+    description: "This API endpoint accepts a PDF document that may comprise multiple types of documents within a single file. Utilizing Azure Custom Classification model, it automatically analyzes the document to identify and categorize distinct document types present across its pages.",
+    parameters: [],
     bodySchema: `{
-  "options": {
-    "ocr_mode": "standard",
-    "extraction_mode": "ocr",
-    "chunking": {
-      "chunk_mode": "variable"
-    }
-  }
+  "file": "binary (PNG, JPG, JPEG, or PDF)"
 }`,
     codeExample: `import requests
 
-url = "https://platform.reducto.ai/split"
-
-payload = {
-    "options": {
-        "ocr_mode": "standard",
-        "extraction_mode": "ocr",
-        "chunking": {
-            "chunk_mode": "variable"
-        }
-    }
-}
-
+url = "https://kong-uat-proxy.hachiai.com/quest/v1/classify"
 headers = {
-    "Authorization": "Bearer <token>",
-    "Content-Type": "application/json"
+    "apiKey": "YOUR_API_KEY"
 }
 
-response = requests.post(url, json=payload, headers=headers)
+files = {
+    'file': open('invoice.pdf', 'rb')
+}
+
+response = requests.post(url, headers=headers, files=files)
 print(response.json())`
   },
   {
-    id: "parse",
-    name: "Parse",
+    id: "extract-async",
+    name: "Document Extraction (Async)",
     method: "POST" as const,
-    path: "/parse",
-    description: "Parse document content into structured data",
-    parameters: [
-      {
-        name: "document_url",
-        type: "string", 
-        required: true,
-        description: "The URL of the document to parse"
-      },
-      {
-        name: "format",
-        type: "string",
-        required: false,
-        description: "Output format (json, xml, csv)"
-      }
-    ],
+    path: "/v1/extract/async",
+    description: "This API runs the DocX Agent asynchronously to extract structured data, such as tables, fields, and entities, from one or more uploaded document files. The asynchronous nature allows processing large or multiple documents without blocking the client.",
+    parameters: [],
     bodySchema: `{
-  "document_url": "https://example.com/document.pdf",
-  "format": "json"
+  "files": "array of binary files",
+  "query": "string - extraction query",
+  "tags": "string - optional tags (default: [])"
 }`,
     codeExample: `import requests
 
-url = "https://platform.reducto.ai/parse"
-
-payload = {
-    "document_url": "https://example.com/document.pdf",
-    "format": "json"
-}
-
+url = "https://kong-uat-proxy.hachiai.com/quest/v1/extract/async"
 headers = {
-    "Authorization": "Bearer <token>",
-    "Content-Type": "application/json"
+    "apiKey": "YOUR_API_KEY"
 }
 
-response = requests.post(url, json=payload, headers=headers)
+files = [
+    ('files', open('document1.pdf', 'rb')),
+    ('files', open('document2.pdf', 'rb'))
+]
+
+data = {
+    'query': 'Extract invoice number, total amount, and line items',
+    'tags': '["invoice", "processing"]'
+}
+
+response = requests.post(url, headers=headers, files=files, data=data)
 print(response.json())`
   },
   {
     id: "extract",
-    name: "Extract",
+    name: "Document Extraction (Sync)",
     method: "POST" as const,
-    path: "/extract",
-    description: "Extract specific information from documents",
-    parameters: [
-      {
-        name: "document_url",
-        type: "string",
-        required: true,
-        description: "The URL of the document to extract from"
-      },
-      {
-        name: "fields",
-        type: "array",
-        required: true,
-        description: "Fields to extract from the document"
-      }
-    ],
+    path: "/v1/extract",
+    description: "This synchronous API runs the DocX Agent on one or more uploaded documents to immediately extract structured data or text based on user-defined extraction queries. The response contains the cleaned, structured data extracted directly from the documents.",
+    parameters: [],
     bodySchema: `{
-  "document_url": "https://example.com/document.pdf",
-  "fields": ["name", "email", "phone"]
+  "files": "array of binary files",
+  "query": "string - extraction query",
+  "tags": "string - optional tags (default: [])"
 }`,
     codeExample: `import requests
 
-url = "https://platform.reducto.ai/extract"
-
-payload = {
-    "document_url": "https://example.com/document.pdf",
-    "fields": ["name", "email", "phone"]
-}
-
+url = "https://kong-uat-proxy.hachiai.com/quest/v1/extract"
 headers = {
-    "Authorization": "Bearer <token>",
-    "Content-Type": "application/json"
+    "apiKey": "YOUR_API_KEY"
 }
 
-response = requests.post(url, json=payload, headers=headers)
+files = [
+    ('files', open('document.pdf', 'rb'))
+]
+
+data = {
+    'query': 'Extract all tables and text content',
+    'tags': '[]'
+}
+
+response = requests.post(url, headers=headers, files=files, data=data)
 print(response.json())`
   },
   {
-    id: "status",
-    name: "Get Status",
+    id: "trace",
+    name: "Check Status by Trace ID",
     method: "GET" as const,
-    path: "/status/{job_id}",
-    description: "Check the status of a processing job",
+    path: "/v1/trace_id/{trace_id}",
+    description: "This API retrieves the detailed processing status and associated metadata for a previously submitted document processing task, identified uniquely by its trace ID. Use this to monitor task progress and outcomes.",
     parameters: [
       {
-        name: "job_id",
+        name: "trace_id",
         type: "string",
         required: true,
-        description: "The ID of the job to check"
+        description: "The unique trace ID corresponding to a specific document processing task"
       }
     ],
     codeExample: `import requests
 
-url = "https://platform.reducto.ai/status/{job_id}"
-
+trace_id = "1234567890abcdef"
+url = f"https://kong-uat-proxy.hachiai.com/quest/v1/trace_id/{trace_id}"
 headers = {
-    "Authorization": "Bearer <token>"
+    "apiKey": "YOUR_API_KEY"
 }
 
 response = requests.get(url, headers=headers)
@@ -160,7 +120,7 @@ print(response.json())`
 ];
 
 const Index = () => {
-  const [selectedEndpoint, setSelectedEndpoint] = useState("split");
+  const [selectedEndpoint, setSelectedEndpoint] = useState("classify");
   
   const currentEndpoint = mockEndpoints.find(ep => ep.id === selectedEndpoint) || mockEndpoints[0];
 
