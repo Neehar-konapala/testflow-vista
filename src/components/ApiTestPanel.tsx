@@ -80,13 +80,24 @@ export const ApiTestPanel = ({ endpoint }: ApiTestPanelProps) => {
         <div className="max-w-4xl">
           {/* Header */}
           <div className="mb-6">
-            <div className="flex items-center gap-3 mb-2">
-              <Badge className={methodColors[endpoint.method]}>
-                {endpoint.method}
-              </Badge>
-              <code className="text-sm bg-muted px-2 py-1 rounded">
-                {endpoint.path}
-              </code>
+            <div className="flex items-center justify-between mb-2">
+              <div className="flex items-center gap-3">
+                <Badge className={methodColors[endpoint.method]}>
+                  {endpoint.method}
+                </Badge>
+                <code className="text-sm bg-muted px-2 py-1 rounded">
+                  {endpoint.path}
+                </code>
+              </div>
+              <Button 
+                onClick={handleTryIt}
+                disabled={isLoading}
+                className="bg-blue-600 hover:bg-blue-700"
+                size="sm"
+              >
+                <Play className="w-4 h-4 mr-2" />
+                Try it
+              </Button>
             </div>
             <h1 className="text-3xl font-bold mb-2">{endpoint.name}</h1>
             <p className="text-muted-foreground">{endpoint.description}</p>
@@ -105,7 +116,7 @@ export const ApiTestPanel = ({ endpoint }: ApiTestPanelProps) => {
                   </Label>
                   <Input
                     id="auth-token"
-                    placeholder="Bearer <token>"
+                    placeholder="enter your API key"
                     value={authToken}
                     onChange={(e) => setAuthToken(e.target.value)}
                     className="mt-1"
@@ -164,16 +175,6 @@ export const ApiTestPanel = ({ endpoint }: ApiTestPanelProps) => {
             </Card>
           )}
 
-          {/* Try It Button */}
-          <Button 
-            onClick={handleTryIt}
-            disabled={isLoading}
-            className="mb-6"
-            size="lg"
-          >
-            <Play className="w-4 h-4 mr-2" />
-            {isLoading ? "Sending..." : "Try it"}
-          </Button>
 
           {/* Response */}
           {response && (
