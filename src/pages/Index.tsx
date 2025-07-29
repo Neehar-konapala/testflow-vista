@@ -58,7 +58,46 @@ files = {
 }
 
 response = requests.post(url, headers=headers, files=files)
-print(response.json())`
+print(response.json())`,
+    responseExamples: {
+      "200": {
+        description: "Classification result containing predicted invoice page ranges and related metadata.",
+        example: `{
+  "results": [
+    {
+      "type": "invoice",
+      "page_range": "1-2",
+      "confidence": 0.95
+    },
+    {
+      "type": "invoice", 
+      "page_range": "3-4",
+      "confidence": 0.90
+    },
+    {
+      "type": "invoice",
+      "page_range": "5",
+      "confidence": 0.85
+    }
+  ],
+  "total_pages": 5,
+  "processing_time": "1.2s",
+  "model_version": "azure-classifier-v2.1"
+}`
+      },
+      "422": {
+        description: "Validation error due to incorrect input file or missing parameters.",
+        example: `{
+  "detail": [
+    {
+      "loc": ["body", "file"],
+      "msg": "field required", 
+      "type": "value_error.missing"
+    }
+  ]
+}`
+      }
+    }
   },
   {
     id: "extract-async",
@@ -126,7 +165,38 @@ data = {
 }
 
 response = requests.post(url, headers=headers, files=files, data=data)
-print(response.json())`
+print(response.json())`,
+    responseExamples: {
+      "200": {
+        description: "Extraction task started successfully, processing is underway.",
+        example: `{
+  "message": "Extraction task started successfully",
+  "trace_id": "abc123def456789",
+  "status": "processing",
+  "estimated_completion": "2-5 minutes",
+  "files_received": 2,
+  "query": "Extract invoice number, total amount, and line items",
+  "tags": ["invoice", "processing"]
+}`
+      },
+      "422": {
+        description: "Validation error due to missing files or malformed query.",
+        example: `{
+  "detail": [
+    {
+      "loc": ["body", "files"],
+      "msg": "field required",
+      "type": "value_error.missing"
+    },
+    {
+      "loc": ["body", "query"], 
+      "msg": "ensure this value has at least 1 characters",
+      "type": "value_error.any_str.min_length"
+    }
+  ]
+}`
+      }
+    }
   },
   {
     id: "extract",
@@ -192,7 +262,55 @@ data = {
 }
 
 response = requests.post(url, headers=headers, files=files, data=data)
-print(response.json())`
+print(response.json())`,
+    responseExamples: {
+      "200": {
+        description: "Extraction results with data, tables, or text found in the documents.",
+        example: `{
+  "extracted_data": [
+    {
+      "field_name": "invoice_number",
+      "value": "INV-2023-001",
+      "confidence": 0.98
+    },
+    {
+      "field_name": "total_amount", 
+      "value": "$1500.00",
+      "confidence": 0.95
+    }
+  ],
+  "tables": [
+    {
+      "table_name": "line_items",
+      "headers": ["Item", "Quantity", "Price", "Total"],
+      "rows": [
+        ["Product A", "2", "$500.00", "$1000.00"],
+        ["Product B", "1", "$500.00", "$500.00"]
+      ]
+    }
+  ],
+  "text_content": "Invoice #INV-2023-001\\nDate: 2023-10-01\\nTotal: $1500.00",
+  "processing_time": "3.2s"
+}`
+      },
+      "422": {
+        description: "Validation error due to missing files, invalid queries, or incorrect parameters.",
+        example: `{
+  "detail": [
+    {
+      "loc": ["body", "query"],
+      "msg": "field required",
+      "type": "value_error.missing"
+    },
+    {
+      "loc": ["body", "files"],
+      "msg": "ensure this value has at least 1 items",
+      "type": "value_error.list.min_items"
+    }
+  ]
+}`
+      }
+    }
   },
   {
     id: "trace",
@@ -259,7 +377,51 @@ headers = {
 }
 
 response = requests.get(url, headers=headers)
-print(response.json())`
+print(response.json())`,
+    responseExamples: {
+      "200": {
+        description: "Status response containing current state and related details of the processing task.",
+        example: `{
+  "trace_id": "1234567890abcdef",
+  "status": "completed",
+  "result": {
+    "extracted_data": [
+      {
+        "field_name": "invoice_number",
+        "value": "INV-2023-001"
+      },
+      {
+        "field_name": "total_amount",
+        "value": "$1000.00"
+      }
+    ],
+    "tables": [
+      {
+        "table_name": "line_items",
+        "rows": [
+          {"item": "Product A", "quantity": 2, "price": "$500.00"},
+          {"item": "Product B", "quantity": 1, "price": "$500.00"}
+        ]
+      }
+    ]
+  },
+  "timestamp": "2023-10-01T12:00:00Z",
+  "processing_time": "2.5s"
+}`
+      },
+      "422": {
+        description: "Validation error when the trace_id is missing or malformed.",
+        example: `{
+  "detail": [
+    {
+      "loc": ["path", "trace_id"],
+      "msg": "field required",
+      "type": "value_error.missing"
+    }
+  ]
+}`
+      }
+    }
   }
 ];
 

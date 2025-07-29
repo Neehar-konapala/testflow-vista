@@ -33,6 +33,11 @@ interface FileUpload {
   description: string;
 }
 
+interface ResponseExample {
+  description: string;
+  example: string;
+}
+
 interface ApiEndpoint {
   id: string;
   name: string;
@@ -46,6 +51,7 @@ interface ApiEndpoint {
   fileUpload?: FileUpload;
   requestBodyType?: string;
   codeExample: string;
+  responseExamples?: Record<string, ResponseExample>;
 }
 
 interface ApiTestPanelProps {
@@ -560,6 +566,47 @@ export const ApiTestPanel = ({ endpoint }: ApiTestPanelProps) => {
               </pre>
             </TabsContent>
           </Tabs>
+
+          {/* Response Examples Section */}
+          {endpoint.responseExamples && (
+            <div className="mt-6">
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="font-semibold">Response Examples</h3>
+              </div>
+              
+              <Tabs defaultValue="200" className="w-full">
+                <TabsList className="grid w-full grid-cols-2">
+                  <TabsTrigger value="200" className="text-green-700">200 Success</TabsTrigger>
+                  <TabsTrigger value="422" className="text-red-700">422 Error</TabsTrigger>
+                </TabsList>
+                
+                {Object.entries(endpoint.responseExamples).map(([statusCode, responseExample]) => (
+                  <TabsContent key={statusCode} value={statusCode} className="mt-4">
+                    <div className="space-y-3">
+                      <div className="flex items-center justify-between">
+                        <Badge className={statusCode === "200" ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800"}>
+                          {statusCode} {statusCode === "200" ? "Success" : "Error"}
+                        </Badge>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => copyToClipboard(responseExample.example)}
+                        >
+                          <Copy className="w-3 h-3" />
+                        </Button>
+                      </div>
+                      <p className="text-xs text-muted-foreground">
+                        {responseExample.description}
+                      </p>
+                      <pre className="text-xs bg-card p-3 rounded-lg overflow-x-auto max-h-64 overflow-y-auto">
+                        <code>{responseExample.example}</code>
+                      </pre>
+                    </div>
+                  </TabsContent>
+                ))}
+              </Tabs>
+            </div>
+          )}
         </div>
       </div>
     </div>
