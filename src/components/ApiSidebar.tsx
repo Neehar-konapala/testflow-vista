@@ -7,6 +7,7 @@ interface ApiEndpoint {
   method: "GET" | "POST" | "PUT" | "DELETE" | "PATCH";
   path: string;
   description: string;
+  tag?: string;
 }
 
 interface ApiSidebarProps {
