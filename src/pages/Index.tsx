@@ -48,7 +48,7 @@ This categorization allows users to automate downstream workflows like targeted 
     },
     codeExample: `import requests
 
-url = "https://kong-uat-proxy.hachiai.com/quest/v1/classify"
+url = "https://demo-url.hachiai.com/quest/v1/classify"
 headers = {
     "apiKey": "YOUR_API_KEY"
 }
@@ -149,7 +149,7 @@ On success, the API acknowledges that extraction has been started, allowing user
     ],
     codeExample: `import requests
 
-url = "https://kong-uat-proxy.hachiai.com/quest/v1/extract/async"
+url = "https://demo-url.hachiai.com/quest/v1/extract/async"
 headers = {
     "apiKey": "YOUR_API_KEY"
 }
@@ -247,7 +247,7 @@ This endpoint is suitable for smaller documents or when immediate extraction res
     ],
     codeExample: `import requests
 
-url = "https://kong-uat-proxy.hachiai.com/quest/v1/extract"
+url = "https://demo-url.hachiai.com/quest/v1/extract"
 headers = {
     "apiKey": "YOUR_API_KEY"
 }
@@ -371,7 +371,7 @@ After submitting an asynchronous extraction or classification task, you receive 
     codeExample: `import requests
 
 trace_id = "1234567890abcdef"
-url = f"https://kong-uat-proxy.hachiai.com/quest/v1/trace_id/{trace_id}"
+url = f"https://demo-url.hachiai.com/quest/v1/trace_id/{trace_id}"
 headers = {
     "apiKey": "YOUR_API_KEY"
 }
